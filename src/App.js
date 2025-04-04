@@ -2,9 +2,13 @@ import React, { useEffect, useRef, useState } from "react";
 import "./App.css";
 
 function App() {
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState(() => {
+    const saved = localStorage.getItem("chatMessages");
+    return saved ? JSON.parse(saved) : [];
+  });
+
   const [input, setInput] = useState("");
-  const [connected, setConnected] = useState(false); // 👈 track connection state
+  const [connected, setConnected] = useState(false);
   const conversationId = "abc123";
   const ws = useRef(null);
 
@@ -12,14 +16,19 @@ function App() {
     ws.current = new WebSocket(`ws://localhost:8000/ws/${conversationId}`);
 
     ws.current.onopen = () => {
-      console.log("✅ WebSocket connection established");
-      setConnected(true); // 👈 mark connection as ready
+      console.log("✅ WebSocket connected");
+      setConnected(true);
     };
 
     ws.current.onmessage = (event) => {
       const msg = JSON.parse(event.data);
       console.log("💬 Message from server:", msg);
-      setMessages((prev) => [...prev, msg]);
+
+      setMessages((prev) => {
+        const updated = [...prev, msg];
+        localStorage.setItem("chatMessages", JSON.stringify(updated)); // Save to localStorage
+        return updated;
+      });
     };
 
     ws.current.onerror = (err) => {
@@ -41,7 +50,7 @@ function App() {
       ws.current.send(JSON.stringify(message));
       setInput("");
     } else {
-      console.warn("WebSocket not ready — message not sent");
+      console.warn("WebSocket not ready");
     }
   };
 
@@ -61,13 +70,11 @@ function App() {
       <div className="chat-input">
         <input
           type="text"
-          placeholder={
-            connected ? "Type a message..." : "Connecting to chat..."
-          }
+          placeholder={connected ? "Type a message..." : "Connecting..."}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-          disabled={!connected} // 👈 disable until connected
+          disabled={!connected}
         />
         <button onClick={sendMessage} disabled={!connected}>
           Send
