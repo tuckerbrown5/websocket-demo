@@ -32,12 +32,11 @@ body {
 
 .chat-bubble {
   margin-bottom: 10px;
-  max-width: 70%;
+  max-width: 75%;
   padding: 10px;
+  background-color: white;
   border-radius: 10px;
-  background-color: #ffffff;
-  align-self: flex-start;
-  border-top-left-radius: 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .text {

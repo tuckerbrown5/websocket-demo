@@ -8,12 +8,21 @@ function App() {
   const ws = useRef(null);
 
   useEffect(() => {
-    // CHANGE localhost to your IP for multi-computer testing
-    ws.current = new WebSocket(`ws://35.130.105.90/ws/${conversationId}`);
+    // Replace localhost with your computer’s IP if testing across devices
+    ws.current = new WebSocket(`ws://localhost:8000/ws/${conversationId}`);
+
+    ws.current.onopen = () => {
+      console.log("✅ WebSocket connection established");
+    };
 
     ws.current.onmessage = (event) => {
+      console.log("💬 Message from server:", event.data);
       const msg = JSON.parse(event.data);
       setMessages((prev) => [...prev, msg]);
+    };
+
+    ws.current.onerror = (err) => {
+      console.error("❌ WebSocket error:", err);
     };
 
     return () => {
@@ -35,7 +44,7 @@ function App() {
 
       <div className="chat-messages">
         {messages.map((msg, index) => (
-          <div key={index} className="chat-bubble other-message">
+          <div key={index} className="chat-bubble">
             <div className="text">{msg.text}</div>
             <div className="timestamp">{msg.time}</div>
           </div>
