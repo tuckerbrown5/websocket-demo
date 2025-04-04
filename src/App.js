@@ -9,7 +9,7 @@ function App() {
 
   useEffect(() => {
     // CHANGE localhost to your IP for multi-computer testing
-    ws.current = new WebSocket(`ws://localhost:8000/ws/${conversationId}`);
+    ws.current = new WebSocket(`ws://35.130.105.90/ws/${conversationId}`);
 
     ws.current.onmessage = (event) => {
       const msg = JSON.parse(event.data);
