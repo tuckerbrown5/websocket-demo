@@ -4,20 +4,21 @@ import "./App.css";
 function App() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
+  const [connected, setConnected] = useState(false); // 👈 track connection state
   const conversationId = "abc123";
   const ws = useRef(null);
 
   useEffect(() => {
-    // Replace localhost with your computer’s IP if testing across devices
     ws.current = new WebSocket(`ws://localhost:8000/ws/${conversationId}`);
 
     ws.current.onopen = () => {
       console.log("✅ WebSocket connection established");
+      setConnected(true); // 👈 mark connection as ready
     };
 
     ws.current.onmessage = (event) => {
-      console.log("💬 Message from server:", event.data);
       const msg = JSON.parse(event.data);
+      console.log("💬 Message from server:", msg);
       setMessages((prev) => [...prev, msg]);
     };
 
@@ -31,10 +32,16 @@ function App() {
   }, []);
 
   const sendMessage = () => {
-    if (input.trim()) {
+    if (
+      input.trim() &&
+      ws.current &&
+      ws.current.readyState === WebSocket.OPEN
+    ) {
       const message = { text: input };
       ws.current.send(JSON.stringify(message));
       setInput("");
+    } else {
+      console.warn("WebSocket not ready — message not sent");
     }
   };
 
@@ -54,12 +61,17 @@ function App() {
       <div className="chat-input">
         <input
           type="text"
-          placeholder="Type a message..."
+          placeholder={
+            connected ? "Type a message..." : "Connecting to chat..."
+          }
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+          disabled={!connected} // 👈 disable until connected
         />
-        <button onClick={sendMessage}>Send</button>
+        <button onClick={sendMessage} disabled={!connected}>
+          Send
+        </button>
       </div>
     </div>
   );
