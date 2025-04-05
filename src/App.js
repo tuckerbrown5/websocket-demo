@@ -13,7 +13,8 @@ function App() {
   const ws = useRef(null);
 
   useEffect(() => {
-    ws.current = new WebSocket(`ws://localhost:8000/ws/${conversationId}`);
+    // ✅ CHANGE THIS LINE TO YOUR IP (the backend host)
+    ws.current = new WebSocket("ws://35.130.105.90:8000/ws/" + conversationId);
 
     ws.current.onopen = () => {
       console.log("✅ WebSocket connected");
@@ -26,7 +27,7 @@ function App() {
 
       setMessages((prev) => {
         const updated = [...prev, msg];
-        localStorage.setItem("chatMessages", JSON.stringify(updated)); // Save to localStorage
+        localStorage.setItem("chatMessages", JSON.stringify(updated));
         return updated;
       });
     };
